@@ -3,13 +3,13 @@ version: "2.1"
 services:
 
   redmine:
-    image: redmine
+    build:
+      context: ./services/redmine/
+    image: kannji_grace_redmine
     #restart: always
     environment:
       - REDMINE_DB_MYSQL=redmine-db
       - REDMINE_DB_PASSWORD=example
-    volumes:
-      - ./services/redmine/mounts/config:/usr/src/redmine/config
     depends_on:
       redmine-db:
         condition: service_healthy
