@@ -1,0 +1,46 @@
+version: "2.1"
+
+services:
+
+  redmine:
+    build:
+      context: .
+    image: test_redmine
+    #restart: always
+    environment:
+      - REDMINE_DB_ADAPTER=mysql2
+      - REDMINE_DB_HOST=redmine-db
+      - REDMINE_DB_PORT=3306
+      - REDMINE_DB_USERNAME=root
+      - REDMINE_DB_PASSWORD=example
+      - REDMINE_DB_DATABASE=redmine-db
+    depends_on:
+      redmine-db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks:
+      redmine:
+        aliases:
+          - redmine
+
+  redmine-db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=redmine
+      - POSTGRES_PASSWORD=qwer1234
+      - POSTGRES_DB=redmine
+    volumes:
+      - ./mounts/db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+    networks:
+      redmine:
+        aliases:
+          - redmine-db
+
+networks:
+  redmine:
