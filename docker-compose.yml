@@ -9,7 +9,7 @@ services:
     restart: always
     environment:
       - REDMINE_DB_MYSQL=redmine-db
-      - REDMINE_DB_PASSWORD=example
+      - REDMINE_DB_PASSWORD
     depends_on:
       redmine-db:
         condition: service_healthy
@@ -23,8 +23,8 @@ services:
     image: mysql
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=example
       - MYSQL_DATABASE=redmine
+      - MYSQL_ROOT_PASSWORD=${REDMINE_DB_PASSWORD}
     volumes:
       - ./services/redmine/mounts/db:/var/lib/mysql
     healthcheck:
@@ -37,8 +37,9 @@ services:
           - redmine-db
 
   owncloud:
-    image: owncloud
-    #restart: always
+    build:
+      context: ./services/owncloud/
+    image: kannji_grace_owncloud
     volumes:
       - ./services/owncloud/mounts/apps:/var/www/html/apps
       - ./services/owncloud/mounts/config:/var/www/html/config
@@ -55,7 +56,7 @@ services:
   owncloud-db:
     image: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      - MYSQL_ROOT_PASSWORD=${OWNCLOUD_DB_PASSWORD}
     volumes:
       - ./services/owncloud/mounts/db:/var/lib/mysql
     healthcheck:
@@ -71,7 +72,7 @@ services:
     image: jenkins
     restart: always
     volumes:
-      # when mount not working: sudo chown -R 1000 services/jenkins/mounts/jenkins_home
+      # when mount not working, do this on host: sudo chown -R 1000 services/jenkins/mounts/jenkins_home
       - ./services/jenkins/mounts/jenkins_home:/var/jenkins_home
     environment:
       # for making jenkins run in a sub url, like so: http://host.tld/jenkins
